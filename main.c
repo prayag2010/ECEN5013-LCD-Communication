@@ -146,7 +146,7 @@ int main(void)
     // } 
     
     drawLineX(100, 50, 10, DISP_BLACK);
-    drawLineY(10, 100, 100, DISP_BLACK);
+    drawLineY(10, 101, 100, DISP_BLACK);
 
     SetMemoryArea(0, 0, 200 - 1, 200 - 1);
     SetMemoryPointer(0, 0);
