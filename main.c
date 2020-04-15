@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "epd1in54.h"
 #include "epdif.h"
+#include "Lucida_Console_8pts.h"
 
 uint8_t imageBuf[5000] = {0};
 uint8_t imageBuffer[200][25];
@@ -60,7 +61,7 @@ void drawLineX(uint16_t startPosX, uint16_t length, uint16_t startPosY, bool col
     {
         if(startPosX + i > 199)
         {
-            printf("%s: Warning: Line write out of bound for X:%d Y:%d at length: %d", __func__, startPosX, startPosY, startPosX + i);
+            printf("%s: Warning: Line write out of bound for X:%d Y:%d at rel length: %d\n", __func__, startPosX, startPosY, startPosX + i);
         }
         drawPixel(startPosX + i, startPosY, color);
     }
@@ -78,9 +79,73 @@ void drawLineY(uint16_t startPosX, uint16_t length, uint16_t startPosY, bool col
     {
         if(startPosY + i > 199)
         {
-            printf("%s: Warning: Line write out of bound for X:%d Y:%d at length: %d", __func__, startPosX, startPosY, startPosX + i);
+            printf("%s: Warning: Line write out of bound for X:%d Y:%d at rel length: %d\n", __func__, startPosX, startPosY, startPosX + i);
         }
         drawPixel(startPosX, startPosY + i, color);
+    }
+}
+
+//Write a single letter on the LCD
+void writeLetter(uint16_t posX, uint16_t posY, bool color, char inChar)
+{
+    if(posX > 199 || posY > 199)
+    {
+        printf("%s: out of bound for X:%d Y:%d\n", __func__, posX, posY);
+        return;
+    }
+
+
+    //Return if invalid character entered
+    if(inChar < ' ' || inChar > '~')
+        return;
+
+    //Offset the input if spce is detected
+    if(inChar == ' ')
+        inChar = '~' + 1;
+
+    //Offset character to index 0
+    inChar -= '!';
+
+    //Loop counters
+    int i = 0;
+    int j = 0;
+    //Start and end index of the array
+    int startFont = inChar * 11;
+    int endFont = (inChar * 11) + 10;
+    // setCursorXY(posX, posY);
+
+    //Send command
+    for(i = startFont; i <= endFont; i++){
+        //Write X axis
+        for(j = 7; j >= 0; j--){
+            //Write Y axis
+            uint16_t temp = ((lucidaConsole_8ptBitmaps_narrow[i] >> j) & 0x01);
+            if(temp){
+                // spi16bytes(color);
+                drawPixel(posX, posY, DISP_BLACK);
+            } else {
+                // spi16bytes(BLACK);
+                drawPixel(posX, posY, DISP_WHITE);
+            }
+            posX++;
+        }
+        posX -= 8;
+
+        //Set the new cursor position
+        // setCursorXY(posX, ++posY);
+        posY++;
+
+    }
+}
+
+//Write a string of characters on the LCD
+void writeString(uint16_t posX, uint16_t posY, bool color, char *inString)
+{
+    //If the string still exists, write it to the LCD
+    while(*inString){
+        writeLetter(posX, posY, color, *inString++);
+        //Move X to the right by the character width
+        posX += 7;
     }
 }
 
@@ -146,7 +211,8 @@ int main(void)
     // } 
     
     drawLineX(100, 50, 10, DISP_BLACK);
-    drawLineY(10, 101, 100, DISP_BLACK);
+    drawLineY(10, 100, 100, DISP_BLACK);
+    writeString(20, 20, DISP_BLACK, "Prayag Desai");
 
     SetMemoryArea(0, 0, 200 - 1, 200 - 1);
     SetMemoryPointer(0, 0);
