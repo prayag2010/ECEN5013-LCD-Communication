@@ -1,27 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include "epd1in54.h"
-#include "epdif.h"
-#include "Lucida_Console_8pts.h"
+#include "drawFunctions.h"
 
-uint8_t imageBuf[5000] = {0};
-uint8_t imageBuffer[200][25];
 
-#define DISP_WHITE 0
-#define DISP_BLACK 1
-
-#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
-#define BYTE_TO_BINARY(byte)  \
-  (byte & 0x80 ? '1' : '0'), \
-  (byte & 0x40 ? '1' : '0'), \
-  (byte & 0x20 ? '1' : '0'), \
-  (byte & 0x10 ? '1' : '0'), \
-  (byte & 0x08 ? '1' : '0'), \
-  (byte & 0x04 ? '1' : '0'), \
-  (byte & 0x02 ? '1' : '0'), \
-  (byte & 0x01 ? '1' : '0') 
 
 void drawPixel(uint8_t x, uint8_t y, bool color)
 {
@@ -164,77 +143,4 @@ void updateDisplay(void)
         }
     }
     DisplayFrame();
-}
-
-
-int main(void)
-{
-    if (wiringPiSetupGpio () == -1) {
-        printf("Wiring pi fault\n");
-        return 1 ;
-    }
-
-    Init(lut_full_update);
-
-    // ClearFrameMemory(0x00);   // bit set = white, bit reset = black
-    // DisplayFrame();
-    ClearFrameMemory(0xFF);   // bit set = white, bit reset = black
-    DisplayFrame();
-
-    for(int i = 0; i < 200; i++)
-    {
-        for(int j = 0; j < 200 / 8; j++)
-        {
-            imageBuffer[i][j] = 0xFF;
-        }
-    }
-    
-
-    // for(long i = 0; i < 2500; i++)
-    // {
-    //     if(i < 20000)
-    //         imageBuf[i] = 0x0f;
-    //     else
-    //         imageBuf[i] = 0x00;
-    // }
-
-    // SetMemoryArea(0, 0, 200 - 1, 200 - 1);
-    // SetMemoryPointer(0, 0);
-    // SendCommand(WRITE_RAM);
-    // // /* send the color data */
-    // for (int i = 0; i < 200 / 8 * 200; i++) {
-    //     SendData(imageBuf[i]);
-    // }    
-    
-    // for (int i = 0; i < 40000; i++) {
-    //     SendData(imageBuf[i]);
-    // }
-    // DisplayFrame();
-
-    // SetFrameMemory(imageBuf, 0, 0, 199, 199);
-    // DisplayFrame();
-
-//   paint.SetRotate(ROTATE_0);
-//   paint.SetWidth(200);
-//   paint.SetHeight(24);
-
-    for(int i = 0; i < 200; i++)
-    {
-        drawPixel(i, i, DISP_BLACK);
-        // printf("Draw for: %d\n", i);
-    }
-    // for (int i = 0; i < 200 / 8 * 200; i++) {
-    //     SendData(imageBuf[i]);
-    // } 
-    
-    drawLineX(100, 50, 10, DISP_BLACK);
-    updateDisplay();
-
-    drawLineY(10, 100, 100, DISP_BLACK);
-    updateDisplay();
-
-    writeString(20, 20, DISP_BLACK, "Prayag");
-    updateDisplay();
-
-    return 0;
 }
