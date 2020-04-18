@@ -40,7 +40,7 @@ int IfInit(void) {
     pinMode(RST_PIN, OUTPUT);
     pinMode(DC_PIN, OUTPUT);
     pinMode(BUSY_PIN, INPUT); 
-    pullUpDnControl(BUSY_PIN, PUD_UP);
+    // pullUpDnControl(BUSY_PIN, PUD_UP);
 
     // TODO:
     // SPI.begin();

@@ -1,12 +1,12 @@
 #include "drawFunctions.h"
 
-
+uint8_t imageBuffer[200][25];
 
 void drawPixel(uint8_t x, uint8_t y, bool color)
 {
     if(x > 199 || y > 199)
     {
-        printf("%s: out of bound for X:%d Y:%d\n", __func__, x, y);
+        PDEBUG("%s: out of bound for X:%d Y:%d\n", __func__, x, y);
         return;
     }
 
@@ -32,15 +32,16 @@ void drawLineX(uint16_t startPosX, uint16_t length, uint16_t startPosY, bool col
 {
     if(startPosX > 199 || startPosY > 199)
     {
-        printf("%s: out of bound for X:%d Y:%d\n", __func__, startPosX, startPosY);
+        PDEBUG("%s: out of bound for X:%d Y:%d\n", __func__, startPosX, startPosY);
         return;
     }
 
-    for(int i = 0; i < length; i++)
+    int i;
+    for(i = 0; i < length; i++)
     {
         if(startPosX + i > 199)
         {
-            printf("%s: Warning: Line write out of bound for X:%d Y:%d at rel length: %d\n", __func__, startPosX, startPosY, startPosX + i);
+            PDEBUG("%s: Warning: Line write out of bound for X:%d Y:%d at rel length: %d\n", __func__, startPosX, startPosY, startPosX + i);
         }
         drawPixel(startPosX + i, startPosY, color);
     }
@@ -50,15 +51,16 @@ void drawLineY(uint16_t startPosX, uint16_t length, uint16_t startPosY, bool col
 {
     if(startPosX > 199 || startPosY > 199)
     {
-        printf("%s: out of bound for X:%d Y:%d\n", __func__, startPosX, startPosY);
+        PDEBUG("%s: out of bound for X:%d Y:%d\n", __func__, startPosX, startPosY);
         return;
     }
 
-    for(int i = 0; i < length; i++)
+    int i;
+    for(i = 0; i < length; i++)
     {
         if(startPosY + i > 199)
         {
-            printf("%s: Warning: Line write out of bound for X:%d Y:%d at rel length: %d\n", __func__, startPosX, startPosY, startPosX + i);
+            PDEBUG("%s: Warning: Line write out of bound for X:%d Y:%d at rel length: %d\n", __func__, startPosX, startPosY, startPosX + i);
         }
         drawPixel(startPosX, startPosY + i, color);
     }
@@ -69,7 +71,7 @@ void writeLetter(uint16_t posX, uint16_t posY, bool color, char inChar)
 {
     if(posX > 199 || posY > 199)
     {
-        printf("%s: out of bound for X:%d Y:%d\n", __func__, posX, posY);
+        PDEBUG("%s: out of bound for X:%d Y:%d\n", __func__, posX, posY);
         return;
     }
 
@@ -133,9 +135,10 @@ void updateDisplay(void)
     SetMemoryArea(0, 0, 200 - 1, 200 - 1);
     SetMemoryPointer(0, 0);
     SendCommand(WRITE_RAM);
-    for(int i = 0; i < 200; i++)
+    int i, j;
+    for(i = 0; i < 200; i++)
     {
-        for(int j = 0; j < 200 / 8; j++)
+        for(j = 0; j < 200 / 8; j++)
         {
             // printf("Send: %d %d\n", i, j);
             SendData(imageBuffer[i][j]);

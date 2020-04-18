@@ -1,0 +1,1 @@
+cmd_/home/pi/epaper/modtest/module.ko := ld -r  -EL -T ./scripts/module-common.lds -T ./arch/arm/kernel/module.lds  --build-id  -o /home/pi/epaper/modtest/module.ko /home/pi/epaper/modtest/module.o /home/pi/epaper/modtest/module.mod.o ;  true

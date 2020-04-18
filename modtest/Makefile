@@ -13,8 +13,8 @@ EXTRA_CFLAGS += $(DEBFLAGS)
 
 ifneq ($(KERNELRELEASE),)
 # call from kernel build system
-obj-m	:= gpioTest.o
-gpioTest-y := eink-module.o drawFunctions.o epd1in541.o epdif1.o Lucida_Console_8pts_narrow.o Lucida_Console_8pts.o
+obj-m	:= module.o
+gpioTest-y := module.o
 else
 
 KERNELDIR ?= /lib/modules/$(shell uname -r)/build

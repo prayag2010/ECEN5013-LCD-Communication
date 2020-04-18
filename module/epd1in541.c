@@ -24,8 +24,15 @@
  * THE SOFTWARE.
  */
 
+#ifndef __KERNEL__
 #include <stdlib.h>
 #include <stdio.h>
+#else
+#include <linux/types.h>
+#include <linux/printk.h>
+#include <linux/delay.h>
+#endif
+
 #include "epd1in54.h"
 
 
@@ -79,7 +86,8 @@ int Init(const unsigned char* lut) {
  */
 void SendCommand(unsigned char command) {
     // DigitalWrite(dc_pin, LOW);
-    digitalWrite(dc_pin, LOW);
+    // digitalWrite(dc_pin, LOW);
+    gpio_set_value(dc_pin, false);
     SpiTransfer(command);
 }
 
@@ -88,7 +96,8 @@ void SendCommand(unsigned char command) {
  */
 void SendData(unsigned char data) {
     // DigitalWrite(dc_pin, HIGH);
-    digitalWrite(dc_pin, HIGH);
+    // digitalWrite(dc_pin, HIGH);
+    gpio_set_value(dc_pin, true);
     SpiTransfer(data);
 }
 
@@ -96,9 +105,10 @@ void SendData(unsigned char data) {
  *  @brief: Wait until the busy_pin goes LOW
  */
 void WaitUntilIdle(void) {
-    printf("Waiting until idle\n");
-    while(digitalRead(busy_pin) == HIGH) {      //LOW: idle, HIGH: busy
-        delay(100);
+    PDEBUG("Waiting until idle\n");
+    while(gpio_get_value(busy_pin) == true) {      //LOW: idle, HIGH: busy
+        // delay(10);
+        msleep(10);
     }      
 }
 
@@ -108,12 +118,18 @@ void WaitUntilIdle(void) {
  *          see Epd::Sleep();
  */
 void Reset(void) {
-    digitalWrite(reset_pin, HIGH);
-    delay(200);  
-    digitalWrite(reset_pin, LOW);                //module reset    
-    delay(10);
-    digitalWrite(reset_pin, HIGH);
-    delay(200);    
+    // digitalWrite(reset_pin, HIGH);
+    gpio_set_value(reset_pin, true);
+    // delay(200);  
+    msleep(200);
+    // digitalWrite(reset_pin, LOW);                //module reset    
+    gpio_set_value(reset_pin, false);
+    // delay(10);
+    msleep(10);
+    // digitalWrite(reset_pin, HIGH);
+    gpio_set_value(reset_pin, true);
+    // delay(200);
+    msleep(200);    
 }
 
 /**
@@ -123,7 +139,8 @@ void SetLut(const unsigned char* lut) {
     // this->lut = lut;
     SendCommand(WRITE_LUT_REGISTER);
     /* the length of look-up table is 30 bytes */
-    for (int i = 0; i < 30; i++) {
+    int i;
+    for (i = 0; i < 30; i++) {
         // SendData(lut[i]);
         SendData(lut_full_update[i]);
     }
@@ -167,8 +184,9 @@ void SetFrameMemory(
     SetMemoryPointer(x, y);
     SendCommand(WRITE_RAM);
     /* send the image data */
-    for (int j = 0; j < y_end - y + 1; j++) {
-        for (int i = 0; i < (x_end - x + 1) / 8; i++) {
+    int i, j;
+    for (j = 0; j < y_end - y + 1; j++) {
+        for (i = 0; i < (x_end - x + 1) / 8; i++) {
             SendData(image_buffer[i + j * (image_width / 8)]);
         }
     }
@@ -192,7 +210,7 @@ void SetFrameMemory(
  *          from the flash).
  */
 void SetFrameMemory1(const unsigned char* image_buffer) {
-    printf("INVALID FUNC SetFrameMemory1, DO NOT CALL\n");
+    PDEBUG("INVALID FUNC SetFrameMemory1, DO NOT CALL\n");
     // SetMemoryArea(0, 0, width - 1, height - 1);
     // SetMemoryPointer(0, 0);
     // SendCommand(WRITE_RAM);
@@ -211,7 +229,8 @@ void ClearFrameMemory(unsigned char color) {
     SetMemoryPointer(0, 0);
     SendCommand(WRITE_RAM);
     /* send the color data */
-    for (int i = 0; i < width / 8 * height; i++) {
+    int i;
+    for (i = 0; i < width / 8 * height; i++) {
         SendData(color);
     }
 }
@@ -269,7 +288,7 @@ void Sleep() {
     SendCommand(DEEP_SLEEP_MODE);
     WaitUntilIdle();
 
-    digitalWrite(reset_pin, LOW);
+    gpio_set_value(reset_pin, false);
 }
 
 const unsigned char lut_full_update[] =
